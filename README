@@ -1,0 +1,13 @@
+
+
+This archive contains the distribution Mojolicious-Command-listdeps,
+version 0.01:
+
+  Command to list dependencies in a Mojolicious project
+
+This software is copyright (c) 2012 by Paul Durden.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
+
+
