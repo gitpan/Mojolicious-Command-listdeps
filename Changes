@@ -1,3 +1,7 @@
+0.03    2012-09-13
+        Added requirement of Mojolicious >= 3.0 which is when the
+        Mojolicious::Command namespace started        
+
 0.02    2012-09-13
         Changed option parsing to match documentation so --include-tests
         works.

@@ -35,7 +35,7 @@ use Mojo::Base 'Mojolicious::Command';
 use File::Find;
 use Module::CoreList;
 
-our $VERSION = "0.02";
+our $VERSION = "0.03";
 
 ##****************************************************************************
 ## Object attributes
@@ -100,11 +100,18 @@ from L<Mojolicious::Command>
 
 =cut
 
-##----------------------------------------------------------------------------
-##     @fn run(@args)
-##  @brief Used to invoke the command with the provided argument list
-##  @param @args - Arguments used to invoke the command
-## @return UNDEF
+##****************************************************************************
+##****************************************************************************
+
+=head2 C<run>
+
+  $command->run;
+  $command->run(@ARGV);
+
+Used to invoke the command.
+
+=cut
+
 ##----------------------------------------------------------------------------
 sub run    ## no critic (RequireArgUnpacking)
 {
