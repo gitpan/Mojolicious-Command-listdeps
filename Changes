@@ -1,0 +1,7 @@
+0.02    2012-09-13
+        Changed option parsing to match documentation so --include-tests
+        works.
+
+0.01    2012-09-13
+        Initial release to CPAN
+

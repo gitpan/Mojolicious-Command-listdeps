@@ -35,7 +35,7 @@ use Mojo::Base 'Mojolicious::Command';
 use File::Find;
 use Module::CoreList;
 
-our $VERSION = "0.01";
+our $VERSION = "0.02";
 
 ##****************************************************************************
 ## Object attributes
@@ -114,10 +114,10 @@ sub run    ## no critic (RequireArgUnpacking)
   ## Parse the options
   $self->_options(
     \@args,
-    'author'  => sub { $include_tests = 1; },
-    'core'    => sub { $skip_core     = 0; },
-    'missing' => sub { $missing_only  = 1; },
-    'verbose' => sub { $verbose       = 1; },
+    'include-tests' => sub { $include_tests = 1; },
+    'core'          => sub { $skip_core     = 0; },
+    'missing'       => sub { $missing_only  = 1; },
+    'verbose'       => sub { $verbose       = 1; },
   );
 
   ## See if we can load the required modules
