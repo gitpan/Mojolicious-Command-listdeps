@@ -35,7 +35,7 @@ use Mojo::Base 'Mojolicious::Command';
 use File::Find;
 use Module::CoreList;
 
-our $VERSION = "0.03";
+our $VERSION = "0.04";
 
 ##****************************************************************************
 ## Object attributes
@@ -382,4 +382,13 @@ sub _numify_version
 1;
 __END__
 
+=head1 SEE ALSO
 
+L<Mojolicious>, L<Mojolicious::Guides>, L<http://mojolicio.us>.
+
+
+=head1 THANKS
+
+This module was inspired by the listdeps command in L<Dist::Zilla> 
+
+=cut

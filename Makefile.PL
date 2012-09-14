@@ -26,12 +26,12 @@ my %WriteMakefileArgs = (
     "Module::CoreList" => 0,
     "Module::Info" => 0,
     "Mojo::Base" => 0,
-    "Mojolicious" => "3.0",
+    "Mojolicious" => "3.16",
     "PPI" => 0,
     "strict" => 0,
     "warnings" => 0
   },
-  "VERSION" => "0.03",
+  "VERSION" => "0.04",
   "test" => {
     "TESTS" => "t/*.t"
   }

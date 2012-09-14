@@ -1,3 +1,8 @@
+0.04    2012-09-14
+        Discovered Mojolicious::Command::_options() method did not
+        exist until v3.16, so changed Mojolicious requirement to
+        3.16 or higher
+
 0.03    2012-09-13
         Added requirement of Mojolicious >= 3.0 which is when the
         Mojolicious::Command namespace started        
