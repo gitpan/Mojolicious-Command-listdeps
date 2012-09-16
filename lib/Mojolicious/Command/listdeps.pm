@@ -33,9 +33,11 @@ use strict;
 use warnings;
 use Mojo::Base 'Mojolicious::Command';
 use File::Find;
+use File::Spec;
 use Module::CoreList;
+use Cwd qw(abs_path);
 
-our $VERSION = "0.04";
+our $VERSION = "0.05";
 
 ##****************************************************************************
 ## Object attributes
@@ -77,6 +79,7 @@ prints the names of perl modules used in those files.
 These options are available:
   --include-tests  Include dependencies required for tests
   --missing        Only list missing modules
+  --skip-lib       Do not list modules found in ./lib as a dependency
   --verbose        List additional information
   --core           Include core modules in list
 EOF
@@ -84,10 +87,12 @@ EOF
 ##-----------------------------------------
 ## Module variables
 ##-----------------------------------------
-my $include_tests = 0;    ## Scan test modules also
-my $missing_only  = 0;    ## Display only missing modules
-my $verbose       = 0;    ## Extra verbage
-my $skip_core     = 1;    ## Skip core modules
+my $include_tests = 0;       ## Scan test modules also
+my $missing_only  = 0;       ## Display only missing modules
+my $verbose       = 0;       ## Extra verbage
+my $skip_core     = 1;       ## Skip core modules
+my $skip_lib      = 0;       ## Skip modules found in ./lib
+my $lib_dir       = qq{};    ## Local ./lib if found
 
 ##****************************************************************************
 ## Object methods
@@ -124,6 +129,7 @@ sub run    ## no critic (RequireArgUnpacking)
     'include-tests' => sub { $include_tests = 1; },
     'core'          => sub { $skip_core     = 0; },
     'missing'       => sub { $missing_only  = 1; },
+    'skip-lib'      => sub { $skip_lib      = 1; },
     'verbose'       => sub { $verbose       = 1; },
   );
 
@@ -145,7 +151,8 @@ sub run    ## no critic (RequireArgUnpacking)
   unless ($core_modules)
   {
     print STDERR (
-qq{ERROR: Could not determine list of core modules for this version of perl!\n}
+      qq{ERROR: Could not determine list of core modules },
+      qq{for this version of perl!\n}
     );
     return -1;
   }
@@ -158,20 +165,22 @@ qq{ERROR: Could not determine list of core modules for this version of perl!\n}
     {
       wanted => sub {
         ## Always look for modules (*.pm)
-        push(@files, $File::Find::name) if ($_ =~ /\.pm$/x);
+        push(@files, File::Spec->canonpath($File::Find::name))
+          if ($_ =~ /\.pm$/x);
         ## Also check test scripts (*.t) if enabled
-        push(@files, $File::Find::name) if ($include_tests && ($_ =~ /\.t$/x));
+        push(@files, File::Spec->canonpath($File::Find::name))
+          if ($include_tests && ($_ =~ /\.t$/x));
       },
     },
     qq{.},    ## Starting directory
   );
 
   ## Set additional library paths
-  my $lib_dir = ((-d qq{lib}) ? qq{lib} : qq{});
-
-  ## Set the include path for Module::Info
-  my @new_inc = @INC;
-  push(@new_inc, $lib_dir) if ($lib_dir);
+  if (-d qq{lib})
+  {
+    ## Use canonpath to conver file separators
+    $lib_dir = File::Spec->canonpath(abs_path(qq{./lib}));
+  }
 
   ## Display extra information
   if ($verbose)
@@ -181,16 +190,39 @@ qq{ERROR: Could not determine list of core modules for this version of perl!\n}
       ($include_tests ? qq{including} : qq{ignoring}),
       qq{ test scripts)\n}
     );
-    print(qq{Adding "./lib/" to include path\n}) if ($lib_dir);
+    print(qq{Adding "./lib/" to include path\n})         if ($lib_dir);
+    print(qq{Skipping modules loaded from "$lib_dir"\n}) if ($lib_dir);
     print(qq{Scanning the following:},
       qq{\n  "}, join(qq{",\n  "}, @files), qq{"\n});
   }
 
   ## Now scan files for dependencies
-  my $results = _scan_for_dependencies(@files);
+  my $dependencies = _scan_for_dependencies(@files);
 
   ## Process the list
-  foreach my $key (sort(keys(%{$results})))
+  _process_results($dependencies, $core_modules);
+  return (0);
+}
+
+##----------------------------------------------------------------------------
+##     @fn _process_results($modules_ref, $core_modules)
+##  @brief Process the hash reference containing the moudle dependencies
+##  @param $modules_ref - HASH reference whose keys are dependencies
+##  @param $core_modules - HASH reference whose keys are core perl modules
+## @return
+##   @note
+##----------------------------------------------------------------------------
+sub _process_results
+{
+  my $modules_ref  = shift;
+  my $core_modules = shift;
+
+  ## Set the include path for Module::Info
+  my @new_inc = @INC;
+  push(@new_inc, $lib_dir) if ($lib_dir);
+
+  ## Process the list
+  foreach my $key (sort(keys(%{$modules_ref})))
   {
     ## Convert Module/Name.pm (if needed)
     my $module = $key;
@@ -202,8 +234,15 @@ qq{ERROR: Could not determine list of core modules for this version of perl!\n}
     ## Get the module info
     my $module_info = Module::Info->new_from_module($module, @new_inc);
 
-    ## Only display missing modules
+    ## Skip modules that can be found (i.e. have $module_info
     next if ($missing_only && $module_info);
+
+    ## Skip modules that are not located in $lib_dir
+    next
+      if ($skip_lib
+      && $module_info
+      && $lib_dir           
+      && ($lib_dir eq substr($module_info->file, 0, length($lib_dir))));
 
     ## If we get here, then we need to list the file
     print($module);
@@ -218,13 +257,14 @@ qq{ERROR: Could not determine list of core modules for this version of perl!\n}
       {
         ## Module is missing, so display name of files using the module
         print(qq{ MISSING used by "},
-          join(qq{", "}, @{$results->{$module}->{used_by}}), qq{"});
+          join(qq{", "}, @{$modules_ref->{$module}->{used_by}}), qq{"});
       }
     }
     print(qq{\n});
   }
 
-  return (0);
+  return;
+
 }
 
 ##----------------------------------------------------------------------------
@@ -343,9 +383,11 @@ sub _load_module
 {
   my $module = shift;
 
+  ## For ease of reading
+  my $eval_stmt = qq{require $module; import  $module; 1;};
+
   ## Attempt to load module
-  my $loaded = eval qq{require $module; import  $module; 1;}
-    ;    ## no critic (ProhibitStringyEval,)
+  my $loaded = eval $eval_stmt;    ## no critic (ProhibitStringyEval)
 
   return $loaded;
 }

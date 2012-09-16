@@ -14,7 +14,9 @@ meta-spec:
   version: 1.4
 name: Mojolicious-Command-listdeps
 requires:
+  Cwd: 0
   File::Find: 0
+  File::Spec: 0
   Module::CoreList: 0
   Module::Info: 0
   Mojo::Base: 0
@@ -22,4 +24,4 @@ requires:
   PPI: 0
   strict: 0
   warnings: 0
-version: 0.04
+version: 0.05

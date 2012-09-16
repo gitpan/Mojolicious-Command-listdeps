@@ -22,7 +22,9 @@ my %WriteMakefileArgs = (
   "LICENSE" => "perl",
   "NAME" => "Mojolicious::Command::listdeps",
   "PREREQ_PM" => {
+    "Cwd" => 0,
     "File::Find" => 0,
+    "File::Spec" => 0,
     "Module::CoreList" => 0,
     "Module::Info" => 0,
     "Mojo::Base" => 0,
@@ -31,7 +33,7 @@ my %WriteMakefileArgs = (
     "strict" => 0,
     "warnings" => 0
   },
-  "VERSION" => "0.04",
+  "VERSION" => "0.05",
   "test" => {
     "TESTS" => "t/*.t"
   }

@@ -1,3 +1,7 @@
+0.05    2012-09-16
+        Added support for the --skip-lib option to not list modules
+        in the ./lib directory (unless missing)
+
 0.04    2012-09-14
         Discovered Mojolicious::Command::_options() method did not
         exist until v3.16, so changed Mojolicious requirement to
