@@ -25,6 +25,7 @@ my %WriteMakefileArgs = (
     "Cwd" => 0,
     "File::Find" => 0,
     "File::Spec" => 0,
+    "Getopt::Long" => 0,
     "Module::CoreList" => 0,
     "Module::Info" => 0,
     "Mojo::Base" => 0,
@@ -33,7 +34,7 @@ my %WriteMakefileArgs = (
     "strict" => 0,
     "warnings" => 0
   },
-  "VERSION" => "0.05",
+  "VERSION" => "0.06",
   "test" => {
     "TESTS" => "t/*.t"
   }

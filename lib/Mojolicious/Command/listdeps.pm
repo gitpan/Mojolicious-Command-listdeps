@@ -36,8 +36,9 @@ use File::Find;
 use File::Spec;
 use Module::CoreList;
 use Cwd qw(abs_path);
+use Getopt::Long qw(GetOptions :config pass_through);
 
-our $VERSION = "0.05";
+our $VERSION = "0.06";
 
 ##****************************************************************************
 ## Object attributes
@@ -124,8 +125,7 @@ sub run    ## no critic (RequireArgUnpacking)
   my @args = @_;
 
   ## Parse the options
-  $self->_options(
-    \@args,
+  GetOptions(
     'include-tests' => sub { $include_tests = 1; },
     'core'          => sub { $skip_core     = 0; },
     'missing'       => sub { $missing_only  = 1; },
